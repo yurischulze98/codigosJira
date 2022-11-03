@@ -1,0 +1,16 @@
+import com.atlassian.jira.component.ComponentAccessor
+import com.atlassian.jira.issue.IssueFieldConstants
+import com.atlassian.jira.issue.MutableIssue
+import com.atlassian.jira.issue.attachment.FileSystemAttachmentDirectoryAccessor
+import com.opensymphony.workflow.InvalidInputException
+
+def attachmentDirectoryAccessor = ComponentAccessor.getComponent(FileSystemAttachmentDirectoryAccessor)
+def temporaryAttachmentDirectory = attachmentDirectoryAccessor.getTemporaryAttachmentDirectory()
+
+def mIssue = issue as MutableIssue
+
+def attachmentNames = mIssue.getModifiedFields().get(IssueFieldConstants.ATTACHMENT)?.newValue
+
+if(!attachmentNames) {
+	invalidInputException = new InvalidInputException("You must upload the attachment")
+}
