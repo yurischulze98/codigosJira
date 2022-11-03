@@ -1,0 +1,45 @@
+//Make the second level of the cascading custom field mandatory
+
+import com.atlassian.jira.component.ComponentAccessor
+import com.atlassian.jira.config.IssueTypeManager
+import com.atlassian.jira.component.ComponentAccessor
+import org.apache.log4j.Logger
+
+def log = Logger.getLogger("com.acme.workflows")
+
+def cfManager = ComponentAccessor.customFieldManager
+def issueManager = ComponentAccessor.getIssueManager();
+def cf = cfManager.getCustomFieldObject ((Long) 10802 )
+def prjNaoValida = issue.projectObject.key == 'POSTOSIPP' || issue.projectObject.key == 'POSTOSCE' || issue.projectObject.key == "POSTOSPOS" || issue.projectObject.key == "POSTOSPF"
+def prjValida = issue.projectObject.key == "POSTOSAS3"
+def validacao = true
+
+
+//Cata valor do Tribo-Squad
+final customFieldName = 'Tribo - Squad'
+def customField = ComponentAccessor.customFieldManager.getCustomFieldObjects(issue).findByName(customFieldName)
+assert customField: "Could not find custom field with name $customFieldName"
+def selectedOptions = issue.getCustomFieldValue(customField) as Map
+def parentOptionLevel = null
+
+
+//VALIDA PROJETOS QUE NÃO USAM TRIBO SQUAD
+if ( issue.getCustomFieldValue(cf) != null || prjNaoValida ){
+validacao = true;
+} else{
+validacao = false;
+}
+
+
+//VALIDA PROJETOS QUE USAM TRIBO-SQUAD (INCLUINDO OS 2 CAMPOS)
+if( prjValida ){
+if ( cfValues['Tribo - Squad']?.values()*.value.size() == 2 ) {
+validacao = true;
+}else if (selectedOptions.get(parentOptionLevel).toString() == "POS"|| selectedOptions.get(parentOptionLevel).toString() == "Digital" ){
+validacao = true;
+}else {
+validacao = false;
+}
+}
+
+return validacao
