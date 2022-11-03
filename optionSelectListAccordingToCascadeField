@@ -1,0 +1,67 @@
+//Single list custom field options according to the second level of the cascading custom field
+
+import com.onresolve.jira.groovy.user.FieldBehaviours
+import com.onresolve.jira.groovy.user.FormField
+import com.atlassian.jira.component.ComponentAccessor
+
+//Get Relevant field and options manager
+def customFieldManager = ComponentAccessor.getCustomFieldManager()
+def optionsManager = ComponentAccessor.getOptionsManager()
+def groupManager = ComponentAccessor.getGroupManager()
+
+//Get select list field and it's options
+def selectList = getFieldByName("Name Select List") //Field name which you want to restrict values
+def customField1 = customFieldManager.getCustomFieldObject(selectList.getFieldId())
+def config = customField1.getRelevantConfig(getIssueContext())
+def options = optionsManager.getOptions(config)
+
+//get the custom field details
+def customField = getFieldByName("Name cascade field")
+
+//get the cascade field value
+def cfAValue = customField.value as List
+
+//for debug purpose
+log.warn "cfAValue: " + cfAValue
+
+if (cfAValue) {
+
+//The 1st value will be your parent value, and the 2nd value will be your child value:
+def parentValue = cfAValue.get(0)
+def childValue = cfAValue.get(1)
+
+//For debug purpose
+log.warn "cfAValue: ${cfAValue}"
+log.warn "parentValue: ${parentValue}"
+log.warn "childValue: ${childValue}"
+
+if(parentValue in "Option 1"){
+    def optionsMap = options.findAll {
+        	it.value in ["Exemple 1", "Exemple 2"] // list of options you want to show
+    	}.collectEntries {
+        	[
+            	(it.optionId.toString()): it.value
+        	]
+    	}
+    	selectList.setFieldOptions(optionsMap)
+} else if (parentValue in "Option 2") {
+    def optionsMap = options.findAll {
+        	it.value in ["Exemple 3", "Exemple 4"] // list of options you want to show
+    	}.collectEntries {
+        	[
+            	(it.optionId.toString()): it.value
+        	]
+    	}
+    	selectList.setFieldOptions(optionsMap)
+} 
+    else {
+    def optionsMap = options.findAll {
+        	it.value in ["Exemple 1", "Exemple 2", "Exemple 3", "Exemple 4"] // list of options you want to show
+    	}.collectEntries {
+        	[
+            	(it.optionId.toString()): it.value
+        	]
+    	}
+    	selectList.setFieldOptions(optionsMap)
+} 
+}
