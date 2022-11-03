@@ -1,0 +1,2 @@
+//Make the second level of the cascading custom field mandatory
+cfValues['Custom Field Name']?.values()*.value.size() == 2
